@@ -1,10 +1,10 @@
 import { colors } from '@/core/theme/colors';
 import { fontSize, radius, spacing } from '@/core/theme/layout';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+// import { router } from 'expo-router';
+import { useNewTransaction } from '@/features/transactions/NewTransactionProvider';
 import { useEffect, useRef } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
-
 type Option = {
   key: string;
   icon: keyof typeof Ionicons.glyphMap;
@@ -18,6 +18,7 @@ type Props = { barHeight: number; onClose: () => void };
 
 export function AddActionMenu({ barHeight, onClose }: Props) {
   const anim = useRef(new Animated.Value(0)).current;
+  const { open } = useNewTransaction();
 
   useEffect(() => {
     Animated.timing(anim, { toValue: 1, duration: 160, useNativeDriver: true }).start();
@@ -32,7 +33,7 @@ export function AddActionMenu({ barHeight, onClose }: Props) {
       enabled: true,
       onPress: () => {
         onClose();
-        router.push('/expense/new');
+        open();
       },
     },
     {

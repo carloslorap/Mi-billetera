@@ -4,13 +4,13 @@ import { fontSize, radius, spacing } from '@/core/theme/layout';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
-    ActivityIndicator,
-    Pressable,
-    StyleSheet,
-    Text,
-    View,
-    type StyleProp,
-    type ViewStyle,
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  type StyleProp,
+  type ViewStyle,
 } from 'react-native';
 
 type IconName = keyof typeof Ionicons.glyphMap;
@@ -92,7 +92,7 @@ export function Button({
     paddingHorizontal: spacing.xl,
     borderWidth: 1,
     borderColor: v.border,
-    borderTopColor: v.borderTop,
+    // borderTopColor: v.borderTop,
   };
 
   const content = (
