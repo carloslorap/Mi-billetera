@@ -11,6 +11,7 @@
       "icon": "./assets/expo.icon"
     },
     "android": {
+      "package": "com.carloslorapuma.mibilletera",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -33,7 +34,15 @@
           "imageWidth": 76
         }
       ],
-      "expo-sqlite"
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Permite usar Face ID para desbloquear tu billetera."
+        }
+      ],
+      "expo-sqlite",
+      "expo-image",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,
