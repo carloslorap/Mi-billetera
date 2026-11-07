@@ -72,6 +72,7 @@ import { colors } from '@/core/theme/colors';
 import { fontSize, radius, spacing } from '@/core/theme/layout';
 import { formatSoles } from '@/core/utils/money';
 import { useCards } from '@/features/cards/hooks';
+import { TransactionItem } from '@/features/transactions/components/TransactionItem';
 import { useRecentTransactions } from '@/features/transactions/hooks';
 import { router } from 'expo-router';
 import { FlatList, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
@@ -147,28 +148,7 @@ export default function HomeScreen() {
         ItemSeparatorComponent={() => <View style={{ height: spacing.sm }} />}
         ListEmptyComponent={<Text style={styles.emptyList}>Aún no hay movimientos.</Text>}
         contentContainerStyle={{ paddingBottom: spacing.xl }}
-        renderItem={({ item }) => {
-          const isExpense = item.type === 'expense';
-          const date = new Date(item.occurred_at).toLocaleDateString('es-PE', {
-            day: '2-digit',
-            month: 'short',
-          });
-          return (
-            <View style={styles.row}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.rowTitle}>
-                  {item.description || item.category || (isExpense ? 'Gasto' : 'Ingreso')}
-                </Text>
-                <Text style={styles.rowSub}>
-                  {item.card_name} · {date}
-                </Text>
-              </View>
-              <Text style={[styles.amount, { color: isExpense ? colors.danger : colors.success }]}>
-                {isExpense ? '-' : '+'} {formatSoles(item.amount_cents)}
-              </Text>
-            </View>
-          );
-        }}
+        renderItem={({ item }) => <TransactionItem item={item} />}
       />
     </SafeAreaView>
   );
