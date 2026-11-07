@@ -12,6 +12,7 @@ export const bottomShade = ['rgba(0,0,0,0)', 'rgba(0,0,0,0.4)'] as const;
 // Relleno con volumen: más claro arriba, más oscuro abajo
 export const greenGradient = ['#B4FF9C', '#7FEF5F'] as const;
 export const metalGradient = ['#3A403D', '#222625'] as const;
+export const dangerGradient = ['#FF8F8F', '#FF5A5A'] as const;
 
 // Resplandores (boxShadow)
 export const glow = {
@@ -23,5 +24,11 @@ export const glow = {
   ],
   badge: [
     { offsetX: 0, offsetY: 0, blurRadius: 14, spreadDistance: 1, color: 'rgba(149,255,119,0.55)' },
+  ],
+  danger: [
+    { offsetX: 0, offsetY: 6, blurRadius: 22, spreadDistance: 0, color: 'rgba(255,107,107,0.35)' },
+  ],
+  depth: [
+    { offsetX: 0, offsetY: 4, blurRadius: 14, spreadDistance: 0, color: 'rgba(0,0,0,0.45)' },
   ],
 };

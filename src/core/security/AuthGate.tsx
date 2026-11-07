@@ -12,8 +12,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
-import { AppState, Pressable, StyleSheet, Text, View } from 'react-native';
+import { AppState, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Button } from '../components/Button';
 
 const LOCK_AFTER_MS = 30_000; // se vuelve a bloquear tras 30 s en segundo plano
 const AUTO_PROMPT = false; // true = pide la huella solo, false = esperar al botón
@@ -101,17 +102,12 @@ export function AuthGate({ children }: { children: ReactNode }) {
           {message ? <Text style={styles.error}>{message}</Text> : null}
         </View>
 
-        <View style={styles.buttonGlow}>
-          <Pressable
-            onPress={authenticate}
-            style={({ pressed }) => pressed && styles.buttonPressed}
-          >
-            <LinearGradient colors={greenGradient} style={styles.button}>
-              <Text style={styles.buttonText}>Entrar con huella o PIN</Text>
-              <Ionicons name="finger-print" size={22} color={colors.background} />
-            </LinearGradient>
-          </Pressable>
-        </View>
+        <Button
+          title="Entrar con huella o PIN"
+          iconRight="finger-print"
+          onPress={authenticate}
+          style={{ marginHorizontal: spacing.lg, marginBottom: spacing.lg }}
+        />
       </SafeAreaView>
     </View>
   );
