@@ -67,7 +67,7 @@
 // });
 
 import { Button } from '@/core/components/Button';
-import { CardView } from '@/core/components/CardView';
+import { CardDeck } from '@/core/components/CardDeck';
 import { colors } from '@/core/theme/colors';
 import { fontSize, radius, spacing } from '@/core/theme/layout';
 import { formatSoles } from '@/core/utils/money';
@@ -85,6 +85,13 @@ export default function HomeScreen() {
   const cardWidth = width - spacing.lg * 2;
   const total = cards.reduce((sum, c) => sum + c.balance_cents, 0);
 
+  const deckCards = cards.map((c) => ({
+    id: c.id,
+    name: c.name,
+    bank: c.bank,
+    balanceCents: c.balance_cents,
+  }));
+
   const header = (
     <View>
       <Text style={styles.sectionLabel}>Tus tarjetas</Text>
@@ -101,20 +108,23 @@ export default function HomeScreen() {
           />
         </View>
       ) : (
-        <FlatList
-          horizontal
-          data={cards}
-          keyExtractor={(c) => c.id}
-          showsHorizontalScrollIndicator={false}
-          decelerationRate="fast"
-          snapToOffsets={cards.map((_, i) => i * (cardWidth + spacing.md))}
-          contentContainerStyle={{ gap: spacing.md, paddingHorizontal: spacing.lg }}
-          renderItem={({ item }) => (
-            <View style={{ width: cardWidth }}>
-              <CardView name={item.name} bank={item.bank} balanceCents={item.balance_cents} />
-            </View>
-          )}
-        />
+        // <FlatList
+        //   horizontal
+        //   data={cards}
+        //   keyExtractor={(c) => c.id}
+        //   showsHorizontalScrollIndicator={false}
+        //   decelerationRate="fast"
+        //   snapToOffsets={cards.map((_, i) => i * (cardWidth + spacing.md))}
+        //   contentContainerStyle={{ gap: spacing.md, paddingHorizontal: spacing.lg }}
+        //   renderItem={({ item }) => (
+        //     <View style={{ width: cardWidth }}>
+        //       <CardView name={item.name} bank={item.bank} balanceCents={item.balance_cents} />
+        //     </View>
+        //   )}
+        // />
+        <View style={{ alignItems: 'center' }}>
+          <CardDeck width={cardWidth} cards={deckCards} />
+        </View>
       )}
 
       {cards.length > 1 ? (

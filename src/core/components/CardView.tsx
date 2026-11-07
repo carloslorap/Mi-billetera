@@ -25,7 +25,7 @@ export function CardView({ name, bank, balanceCents, last4 }: Props) {
         styles.shadow,
         {
           boxShadow: [
-            { offsetX: 0, offsetY: 10, blurRadius: 28, spreadDistance: 0, color: theme.glow },
+            { offsetX: 0, offsetY: 8, blurRadius: 15, spreadDistance: 0, color: theme.glow },
           ],
         },
       ]}

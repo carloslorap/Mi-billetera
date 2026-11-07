@@ -19,4 +19,4 @@ export function getCardTheme(bank?: string | null, name?: string): CardTheme {
   if (text.includes('interbank') || text.includes('ibk')) return THEMES.interbank;
   if (text.includes('scotia')) return THEMES.scotiabank;
   return THEMES.default;
-}
+}   
