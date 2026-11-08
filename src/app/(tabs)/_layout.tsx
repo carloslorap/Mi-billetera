@@ -54,8 +54,8 @@ export default function TabsLayout() {
           options={{ title: 'Inicio', tabBarIcon: tabIcon('home', 'home-outline') }}
         />
         <Tabs.Screen
-          name="cards"
-          options={{ title: 'Tarjetas', tabBarIcon: tabIcon('card', 'card-outline') }}
+          name="debts"
+          options={{ title: 'Deudas', tabBarIcon: tabIcon('receipt', 'receipt-outline') }}
         />
         {/* Hueco vacío: el botón central flota encima */}
         <Tabs.Screen

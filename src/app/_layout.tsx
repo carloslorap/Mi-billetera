@@ -1,6 +1,7 @@
 import { migrateDb } from '@/core/db/migrations';
 import { AuthGate } from '@/core/security/AuthGate';
 import { colors } from '@/core/theme/colors';
+import { AddCardProvider } from '@/features/cards/AddCardProvider';
 import { NewTransactionProvider } from '@/features/transactions/NewTransactionProvider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
@@ -13,6 +14,7 @@ export default function RootLayout() {
     <SQLiteProvider databaseName="billetera.db" onInit={migrateDb}>
       <AuthGate>
         <QueryClientProvider client={queryClient}>
+          <AddCardProvider>
           <NewTransactionProvider>
             <Stack
               screenOptions={{
@@ -21,6 +23,7 @@ export default function RootLayout() {
               }}
             />
           </NewTransactionProvider>
+          </AddCardProvider>
         </QueryClientProvider>
       </AuthGate>
     </SQLiteProvider>

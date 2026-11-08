@@ -71,10 +71,10 @@ import { CardDeck } from '@/core/components/CardDeck';
 import { colors } from '@/core/theme/colors';
 import { fontSize, radius, spacing } from '@/core/theme/layout';
 import { formatSoles } from '@/core/utils/money';
+import { useAddCard } from '@/features/cards/AddCardProvider';
 import { useCards } from '@/features/cards/hooks';
 import { TransactionItem } from '@/features/transactions/components/TransactionItem';
 import { useRecentTransactions } from '@/features/transactions/hooks';
-import { router } from 'expo-router';
 import { FlatList, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -82,6 +82,7 @@ export default function HomeScreen() {
   const { width } = useWindowDimensions();
   const { data: cards = [] } = useCards();
   const { data: transactions = [] } = useRecentTransactions(15);
+  const { open: openAddCard } = useAddCard()
 
   const cardWidth = width - spacing.lg * 2;
   const total = cards.reduce((sum, c) => sum + c.balance_cents, 0);
@@ -105,7 +106,7 @@ export default function HomeScreen() {
             size="md"
             variant="secondary"
             fullWidth={false}
-            onPress={() => router.push('/cards')}
+            onPress={openAddCard}
           />
         </View>
       ) : (

@@ -2,6 +2,7 @@ import { colors } from '@/core/theme/colors';
 import { fontSize, radius, spacing } from '@/core/theme/layout';
 import { Ionicons } from '@expo/vector-icons';
 // import { router } from 'expo-router';
+import { useAddCard } from '@/features/cards/AddCardProvider';
 import { useNewTransaction } from '@/features/transactions/NewTransactionProvider';
 import { useEffect, useRef } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -19,12 +20,24 @@ type Props = { barHeight: number; onClose: () => void };
 export function AddActionMenu({ barHeight, onClose }: Props) {
   const anim = useRef(new Animated.Value(0)).current;
   const { open } = useNewTransaction();
+  const { open: openAddCard } = useAddCard();
 
   useEffect(() => {
     Animated.timing(anim, { toValue: 1, duration: 160, useNativeDriver: true }).start();
   }, [anim]);
 
   const options: Option[] = [
+    {
+      key: 'card',
+      icon: 'card-outline',
+      title: 'Agregar tarjeta',
+      subtitle: 'BCP, BBVA, Interbank y más',
+      enabled: true,
+      onPress: () => {
+        onClose();
+        openAddCard();
+      },
+    },
     {
       key: 'write',
       icon: 'pencil-outline',

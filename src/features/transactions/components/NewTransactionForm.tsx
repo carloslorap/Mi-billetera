@@ -5,13 +5,13 @@ import { Keypad } from '@/core/components/Keypad';
 import { colors } from '@/core/theme/colors';
 import { fontSize, radius, spacing } from '@/core/theme/layout';
 import { formatSoles, toCents } from '@/core/utils/money';
+import { useAddCard } from '@/features/cards/AddCardProvider';
 import { useCards } from '@/features/cards/hooks';
 import { nextAmount } from '@/features/transactions/amountInput';
 import { EXPENSE_CATEGORIES } from '@/features/transactions/categories';
 import { useCreateTransaction } from '@/features/transactions/hooks';
 import type { TransactionType } from '@/features/transactions/types';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
@@ -42,6 +42,7 @@ export function NewTransactionForm({ close }: { close: (after?: () => void) => v
   const isExpense = type === 'expense';
   const value = amount === '' ? 0 : parseFloat(amount);
   const cardId = selectedCardId ?? cards[0]?.id ?? null;
+  const { open: openAddCard } = useAddCard();
 
   const onSave = () => {
     if (!cardId || value <= 0) return;
@@ -138,7 +139,7 @@ export function NewTransactionForm({ close }: { close: (after?: () => void) => v
                 variant="secondary"
                 size="md"
                 fullWidth={false}
-                onPress={() => close(() => router.navigate('/cards'))}
+                onPress={() => close(openAddCard)}
               />
             </View>
           ) : (
