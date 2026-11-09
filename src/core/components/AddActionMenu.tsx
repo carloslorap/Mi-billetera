@@ -3,6 +3,7 @@ import { fontSize, radius, spacing } from '@/core/theme/layout';
 import { Ionicons } from '@expo/vector-icons';
 // import { router } from 'expo-router';
 import { useAddCard } from '@/features/cards/AddCardProvider';
+import { useNewLoan } from '@/features/loans/NewLoanProvider';
 import { useNewTransaction } from '@/features/transactions/NewTransactionProvider';
 import { useEffect, useRef } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -21,7 +22,7 @@ export function AddActionMenu({ barHeight, onClose }: Props) {
   const anim = useRef(new Animated.Value(0)).current;
   const { open } = useNewTransaction();
   const { open: openAddCard } = useAddCard();
-
+  const { open: openLoan } = useNewLoan();
   useEffect(() => {
     Animated.timing(anim, { toValue: 1, duration: 160, useNativeDriver: true }).start();
   }, [anim]);
@@ -36,6 +37,17 @@ export function AddActionMenu({ barHeight, onClose }: Props) {
       onPress: () => {
         onClose();
         openAddCard();
+      },
+    },
+    {
+      key: 'loan',
+      icon: 'cash-outline',
+      title: 'Prestar dinero',
+      subtitle: 'A quién y cuándo te lo devuelve',
+      enabled: true,
+      onPress: () => {
+        onClose();
+        openLoan();
       },
     },
     {

@@ -2,6 +2,7 @@ import { migrateDb } from '@/core/db/migrations';
 import { AuthGate } from '@/core/security/AuthGate';
 import { colors } from '@/core/theme/colors';
 import { AddCardProvider } from '@/features/cards/AddCardProvider';
+import { NewLoanProvider } from '@/features/loans/NewLoanProvider';
 import { NewTransactionProvider } from '@/features/transactions/NewTransactionProvider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
@@ -15,14 +16,16 @@ export default function RootLayout() {
       <AuthGate>
         <QueryClientProvider client={queryClient}>
           <AddCardProvider>
-          <NewTransactionProvider>
-            <Stack
-              screenOptions={{
-                headerShown: false,
-                contentStyle: { backgroundColor: colors.background },
-              }}
-            />
-          </NewTransactionProvider>
+            <NewTransactionProvider>
+              <NewLoanProvider>
+                <Stack
+                  screenOptions={{
+                    headerShown: false,
+                    contentStyle: { backgroundColor: colors.background },
+                  }}
+                />
+              </NewLoanProvider>
+            </NewTransactionProvider>
           </AddCardProvider>
         </QueryClientProvider>
       </AuthGate>
