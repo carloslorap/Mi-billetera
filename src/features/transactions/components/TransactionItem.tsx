@@ -1,3 +1,4 @@
+import { TransactionKind } from '@/core/db/kinds';
 import { colors } from '@/core/theme/colors';
 import { fontSize, radius, spacing } from '@/core/theme/layout';
 import { formatSoles } from '@/core/utils/money';
@@ -6,30 +7,24 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, Text, View } from 'react-native';
 import type { Transaction } from '../types';
 
+const RED = { color: colors.danger, tint: 'rgba(255,107,107,0.14)', watermark: 'rgba(255,107,107,0.07)' };
+const GREEN = { color: colors.success, tint: 'rgba(149,255,119,0.12)', watermark: 'rgba(149,255,119,0.07)' };
+const AMBER = { color: colors.warning, tint: 'rgba(255,200,87,0.12)', watermark: 'rgba(255,200,87,0.07)' };
+
 // Un tono por tipo de movimiento: color, flecha de fondo y signo
 const TONES = {
-    expense: {
-        color: colors.danger,
-        arrow: 'arrow-up',
-        tint: 'rgba(255,107,107,0.14)',
-        watermark: 'rgba(255,107,107,0.07)',
-        sign: '-',
-        fallback: 'Gasto',
-    },
-    income: {
-        color: colors.success,
-        arrow: 'arrow-down',
-        tint: 'rgba(149,255,119,0.12)',
-        watermark: 'rgba(149,255,119,0.07)',
-        sign: '+',
-        fallback: 'Ingreso',
-    },
-} as const;
+  expense: { ...RED, arrow: 'arrow-up', sign: '-', fallback: 'Gasto' },
+  income: { ...GREEN, arrow: 'arrow-down', sign: '+', fallback: 'Ingreso' },
+  loan_given: { ...AMBER, arrow: 'arrow-up', sign: '-', fallback: 'Préstamo dado' },
+  loan_collected: { ...GREEN, arrow: 'arrow-down', sign: '+', fallback: 'Cobro de préstamo' },
+  loan_received: { ...GREEN, arrow: 'arrow-down', sign: '+', fallback: 'Préstamo recibido' },
+  debt_paid: { ...AMBER, arrow: 'arrow-up', sign: '-', fallback: 'Pago de deuda' },
+} as const satisfies Record<TransactionKind, unknown>;
 
 const ARROW_SIZE = 65;
 
 export function TransactionItem({ item }: { item: Transaction }) {
-    const tone = TONES[item.type];
+    const tone = TONES[item.kind];
     const title = item.description || item.category || tone.fallback;
     const date = new Date(item.occurred_at).toLocaleDateString('es-PE', {
         day: '2-digit',
@@ -47,7 +42,7 @@ export function TransactionItem({ item }: { item: Transaction }) {
                 <View style={styles.watermarkBox} pointerEvents="none">
                     <Ionicons
                         name={tone.arrow}
-                        size={ARROW_SIZE}
+                        size={ARROW_SIZE}   
                         color={tone.watermark}
                         style={styles.watermarkIcon}
                     />

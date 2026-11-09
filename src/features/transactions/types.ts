@@ -1,10 +1,13 @@
-export type TransactionType = 'expense' | 'income';
+import type { TransactionKind } from '@/core/db/kinds';
+
+// Tipos que se registran a mano con el formulario de movimientos
+export type TransactionType = Extract<TransactionKind, 'expense' | 'income'>;
 
 export type Transaction = {
   id: string;
   card_id: string;
   card_name: string;
-  type: TransactionType;
+  kind: TransactionKind;
   amount_cents: number;
   description: string | null;
   category: string | null;
@@ -13,7 +16,7 @@ export type Transaction = {
 
 export type NewTransaction = {
   cardId: string;
-  type: TransactionType;
+  kind: TransactionType;
   amountCents: number;
   description?: string;
   category?: string;

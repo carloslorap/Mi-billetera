@@ -5,9 +5,10 @@ import type { NewCard } from './types';
 
 export function useCards() {
   const db = useSQLiteContext();
-  return useQuery({ queryKey: ['cards'], queryFn: () => getCards(db) });
+  const query = useQuery({ queryKey: ['cards'], queryFn: () => getCards(db) });
+  if (query.error) console.error('[useCards] falló:', query.error);
+  return query;
 }
-
 export function useCreateCard() {
   const db = useSQLiteContext();
   const queryClient = useQueryClient();

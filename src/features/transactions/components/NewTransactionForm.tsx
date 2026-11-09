@@ -49,7 +49,7 @@ export function NewTransactionForm({ close }: { close: (after?: () => void) => v
     createTransaction.mutate(
       {
         cardId,
-        type,
+        kind: type,
         amountCents: toCents(value),
         description,
         category: isExpense ? category ?? undefined : undefined,
