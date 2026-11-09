@@ -1,7 +1,9 @@
+import { formatSoles } from '@/core/utils/money';
 import { normalizeText } from '@/core/utils/text';
 import * as Crypto from 'expo-crypto';
 import { type SQLiteDatabase } from 'expo-sqlite';
-import type { NewLoan, Person, PersonDebt } from './types';
+import { allocateOldestFirst } from './allocate';
+import type { LoanWithPaid, NewLoan, NewPayment, PaymentRow, Person, PersonDebt, PersonDetail } from './types';
 
 export function getPeople(db: SQLiteDatabase) {
   return db.getAllAsync<Person>(
@@ -91,4 +93,104 @@ export async function createLoan(db: SQLiteDatabase, input: NewLoan) {
   });
 
   return loanId;
+}
+
+function paymentError(message: string) {
+  const e = new Error(message) as Error & { paymentError?: boolean };
+  e.paymentError = true;
+  return e;
+}
+
+// Distingue los avisos pensados para el usuario ("solo debe S/ 30") de los fallos técnicos
+export function isPaymentError(e: unknown): e is Error {
+  return e instanceof Error && (e as Error & { paymentError?: boolean }).paymentError === true;
+}
+
+export async function getPersonDetail(
+  db: SQLiteDatabase,
+  personId: string
+): Promise<PersonDetail | null> {
+  const person = await db.getFirstAsync<{ id: string; name: string }>(
+    'SELECT id, name FROM people WHERE id = ? AND deleted_at IS NULL',
+    [personId]
+  );
+  if (!person) return null;
+
+  const loans = await db.getAllAsync<LoanWithPaid>(
+    `SELECT l.id, l.amount_cents, l.expected_return_date, l.notes, l.created_at,
+            COALESCE(SUM(p.amount_cents), 0) AS paid_cents
+     FROM loans l
+     LEFT JOIN loan_payments p ON p.loan_id = l.id AND p.deleted_at IS NULL
+     WHERE l.person_id = ? AND l.direction = 'lent' AND l.deleted_at IS NULL
+     GROUP BY l.id
+     ORDER BY l.created_at ASC, l.rowid ASC`,
+    [personId]
+  );
+
+  const payments = await db.getAllAsync<PaymentRow>(
+    `SELECT p.id, p.loan_id, p.amount_cents, p.paid_at, c.name AS card_name
+     FROM loan_payments p
+     JOIN loans l ON l.id = p.loan_id
+     LEFT JOIN transactions t ON t.loan_payment_id = p.id AND t.deleted_at IS NULL
+     LEFT JOIN cards c ON c.id = t.card_id
+     WHERE l.person_id = ? AND l.direction = 'lent'
+       AND l.deleted_at IS NULL AND p.deleted_at IS NULL
+     ORDER BY p.paid_at DESC, p.rowid DESC`,
+    [personId]
+  );
+
+  return { person, loans, payments };
+}
+
+// Aplica el pago al préstamo más antiguo primero. Todo o nada.
+export async function registerPayment(db: SQLiteDatabase, input: NewPayment) {
+  const created: { paymentId: string; loanId: string; amountCents: number }[] = [];
+
+  await db.withTransactionAsync(async () => {
+    const person = await db.getFirstAsync<{ name: string }>(
+      'SELECT name FROM people WHERE id = ? AND deleted_at IS NULL',
+      [input.personId]
+    );
+    if (!person) throw paymentError('Esa persona ya no existe.');
+
+    // Se vuelve a leer lo que falta dentro de la transacción, no se confía en la pantalla
+    const openLoans = await db.getAllAsync<{ id: string; remaining_cents: number }>(
+      `SELECT l.id AS id,
+              l.amount_cents - COALESCE((
+                SELECT SUM(p.amount_cents) FROM loan_payments p
+                WHERE p.loan_id = l.id AND p.deleted_at IS NULL
+              ), 0) AS remaining_cents
+       FROM loans l
+       WHERE l.person_id = ? AND l.direction = 'lent' AND l.deleted_at IS NULL
+       ORDER BY l.created_at ASC, l.rowid ASC`,
+      [input.personId]
+    );
+
+    const { allocations, unallocatedCents } = allocateOldestFirst(openLoans, input.amountCents);
+    if (unallocatedCents > 0) {
+      const debt = input.amountCents - unallocatedCents;
+      throw paymentError(`${person.name} solo debe ${formatSoles(debt)}.`);
+    }
+
+    const now = new Date().toISOString();
+    for (const a of allocations) {
+      const paymentId = Crypto.randomUUID();
+      await db.runAsync(
+        'INSERT INTO loan_payments (id, loan_id, amount_cents, paid_at) VALUES (?, ?, ?, ?)',
+        [paymentId, a.loanId, a.amountCents, now]
+      );
+
+      if (input.cardId) {
+        await db.runAsync(
+          `INSERT INTO transactions
+             (id, card_id, kind, amount_cents, description, occurred_at, loan_payment_id)
+           VALUES (?, ?, 'loan_collected', ?, ?, ?, ?)`,
+          [Crypto.randomUUID(), input.cardId, a.amountCents, `Pago de ${person.name}`, now, paymentId]
+        );
+      }
+      created.push({ paymentId, loanId: a.loanId, amountCents: a.amountCents });
+    }
+  });
+
+  return created;
 }

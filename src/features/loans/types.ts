@@ -22,3 +22,32 @@ export type NewLoan = {
   expectedReturnDate: string | null; // 'YYYY-MM-DD'
   notes?: string;
 };
+
+export type LoanWithPaid = {
+  id: string;
+  amount_cents: number;
+  expected_return_date: string | null;
+  notes: string | null;
+  created_at: string;
+  paid_cents: number;
+};
+
+export type PaymentRow = {
+  id: string;
+  loan_id: string;
+  amount_cents: number;
+  paid_at: string;
+  card_name: string | null; // null = efectivo
+};
+
+export type PersonDetail = {
+  person: { id: string; name: string };
+  loans: LoanWithPaid[]; // del más antiguo al más reciente: el orden en que se aplican los pagos
+  payments: PaymentRow[]; // del más reciente al más antiguo
+};
+
+export type NewPayment = {
+  personId: string;
+  amountCents: number;
+  cardId: string | null; // null = efectivo
+};

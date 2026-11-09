@@ -8,6 +8,7 @@ import { usePersonDebts } from '@/features/loans/hooks';
 import { useNewLoan } from '@/features/loans/NewLoanProvider';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -82,7 +83,7 @@ export default function LoansScreen() {
             ) : null}
           </View>
         }
-        renderItem={({ item }) => <PersonDebtRow item={item} />}
+        renderItem={({ item }) => <PersonDebtRow item={item} onPress={() => router.push({ pathname: '/people/[id]', params: { id: item.person_id } })} />}
       />
     </SafeAreaView>
   );
