@@ -3,6 +3,7 @@ import { colors } from '@/core/theme/colors';
 import { fontSize, radius, spacing } from '@/core/theme/layout';
 import { formatShortDate } from '@/core/utils/dates';
 import { formatSoles } from '@/core/utils/money';
+import { DIRECTION, type LoanDirection } from '@/features/loans/direction';
 import { dueInfo, type DueTone } from '@/features/loans/dueInfo';
 import { usePersonDetail } from '@/features/loans/hooks';
 import { useNewLoan } from '@/features/loans/NewLoanProvider';
@@ -22,10 +23,13 @@ const TONE_COLOR: Record<DueTone, string> = {
 };
 
 export default function PersonDetailScreen() {
-  const params = useLocalSearchParams<{ id: string }>();
+  const params = useLocalSearchParams<{ id: string; direction?: string }>();
   const personId = Array.isArray(params.id) ? params.id[0] : params.id;
+  const rawDirection = Array.isArray(params.direction) ? params.direction[0] : params.direction;
+  const direction: LoanDirection = rawDirection === 'borrowed' ? 'borrowed' : 'lent';
+  const cfg = DIRECTION[direction];
 
-  const { data: detail, isLoading } = usePersonDetail(personId ?? null);
+  const { data: detail, isLoading } = usePersonDetail(personId ?? null, direction);
   const { open: openLoan } = useNewLoan();
   const { open: openPayment } = usePaymentSheet();
 
@@ -36,6 +40,9 @@ export default function PersonDetailScreen() {
   const remaining = lent - paid;
   const settled = lent > 0 && remaining <= 0;
   const progress = lent > 0 ? Math.min(1, paid / lent) : 0;
+
+  const paymentSign = direction === 'lent' ? '+' : '-';
+  const paymentColor = direction === 'lent' ? colors.success : colors.warning;
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
@@ -53,26 +60,28 @@ export default function PersonDetailScreen() {
       ) : (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <LinearGradient
-            colors={[colors.surface, 'rgba(149,255,119,0.12)']}
+            colors={[colors.surface, cfg.tint]}
             start={{ x: 0.3, y: 0.5 }}
             end={{ x: 1, y: 0.5 }}
             style={styles.summary}
           >
             <View style={styles.watermarkBox}>
               <Ionicons
-                name="arrow-down"
+                name={cfg.arrow}
                 size={ARROW_SIZE}
-                color="rgba(149,255,119,0.07)"
+                color={cfg.watermark}
                 style={styles.watermarkIcon}
               />
             </View>
-            <Text style={styles.summaryLabel}>{settled ? 'Estado' : 'Te debe'}</Text>
-            <Text style={styles.summaryValue}>{settled ? 'Todo cobrado' : formatSoles(remaining)}</Text>
+            <Text style={styles.summaryLabel}>{settled ? 'Estado' : cfg.detailLabel}</Text>
+            <Text style={[styles.summaryValue, { color: cfg.accent }]}>
+              {settled ? cfg.settledLabel : formatSoles(remaining)}
+            </Text>
             <View style={styles.track}>
               <View style={[styles.fill, { width: `${progress * 100}%` }]} />
             </View>
             <Text style={styles.summaryHint}>
-              Cobrado {formatSoles(paid)} de {formatSoles(lent)}
+              {cfg.progress(formatSoles(paid), formatSoles(lent))}
             </Text>
           </LinearGradient>
 
@@ -81,18 +90,18 @@ export default function PersonDetailScreen() {
               title="Registrar pago"
               iconLeft="cash-outline"
               disabled={remaining <= 0}
-              onPress={() => personId && openPayment(personId)}
+              onPress={() => personId && openPayment(personId, direction)}
               style={{ flex: 1.4 }}
             />
             <Button
-              title="Prestar más"
+              title={cfg.moreButton}
               variant="secondary"
-              onPress={() => personId && openLoan(personId)}
+              onPress={() => personId && openLoan(direction, personId)}
               style={{ flex: 1 }}
             />
           </View>
 
-          <Text style={styles.section}>Préstamos</Text>
+          <Text style={styles.section}>{cfg.loansSection}</Text>
           {loans.map((l) => {
             const left = l.amount_cents - l.paid_cents;
             const done = left <= 0;
@@ -115,7 +124,7 @@ export default function PersonDetailScreen() {
                 </View>
                 <View style={[styles.pill, done && styles.pillDone]}>
                   <Text style={[styles.pillText, done && { color: colors.success }]}>
-                    {done ? 'Pagado' : `Debe ${formatSoles(left)}`}
+                    {done ? 'Pagado' : `${cfg.pillOwes} ${formatSoles(left)}`}
                   </Text>
                 </View>
               </View>
@@ -129,8 +138,8 @@ export default function PersonDetailScreen() {
             payments.map((p) => (
               <View key={p.id} style={styles.item}>
                 <View style={{ flex: 1 }}>
-                  <Text style={[styles.itemTitle, { color: colors.success }]}>
-                    + {formatSoles(p.amount_cents)}
+                  <Text style={[styles.itemTitle, { color: paymentColor }]}>
+                    {paymentSign} {formatSoles(p.amount_cents)}
                   </Text>
                   <Text style={styles.itemSub}>
                     {formatShortDate(p.paid_at)} · {p.card_name ?? 'Efectivo'}
@@ -178,7 +187,7 @@ const styles = StyleSheet.create({
   },
   watermarkIcon: { lineHeight: ARROW_SIZE, includeFontPadding: false },
   summaryLabel: { color: colors.textSecondary, fontSize: fontSize.md },
-  summaryValue: { color: colors.primary, fontSize: 32, fontWeight: '700', marginTop: 2 },
+  summaryValue: { fontSize: 32, fontWeight: '700', marginTop: 2 },
   track: {
     height: 4,
     borderRadius: 2,

@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { addDays, addMonths, format } from 'date-fns';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { DIRECTION, type LoanDirection } from '../direction';
 import { useCreateLoan, usePeople } from '../hooks';
 
 const QUICK_AMOUNTS = [20, 50, 100, 200];
@@ -30,9 +31,11 @@ const DUE_OPTIONS: DueOption[] = [
 type Props = {
   close: (after?: () => void) => void;
   initialPersonId: string | null;
+  direction: LoanDirection;
 };
 
-export function NewLoanForm({ close, initialPersonId }: Props) {
+export function NewLoanForm({ close, initialPersonId, direction }: Props) {
+  const cfg = DIRECTION[direction];
   const { data: people = [], isLoading: loadingPeople } = usePeople();
   const { data: cards = [] } = useCards();
   const createLoan = useCreateLoan();
@@ -57,6 +60,7 @@ export function NewLoanForm({ close, initialPersonId }: Props) {
     const due = DUE_OPTIONS.find((o) => o.key === dueKey)?.date() ?? null;
     createLoan.mutate(
       {
+        direction,
         person: selectedPerson
           ? { id: selectedPerson.id, name: selectedPerson.name }
           : { id: null, name: personName },
@@ -85,11 +89,11 @@ export function NewLoanForm({ close, initialPersonId }: Props) {
       {step === 1 ? (
         <>
           <View style={styles.headerRow}>
-            <Text style={styles.title}>Nuevo préstamo</Text>
+            <Text style={styles.title}>{cfg.newTitle}</Text>
             {closeButton}
           </View>
 
-          <Text style={styles.label}>¿A quién le prestas?</Text>
+          <Text style={styles.label}>{cfg.personQuestion}</Text>
           <View style={styles.wrap}>
             {people.map((p) => (
               <Chip
@@ -161,11 +165,11 @@ export function NewLoanForm({ close, initialPersonId }: Props) {
           </View>
 
           <View style={styles.summary}>
-            <Text style={styles.summaryLabel}>Prestas a {personName}</Text>
+            <Text style={styles.summaryLabel}>{cfg.amountLine(personName)}</Text>
             <Text style={styles.summaryValue}>{formatSoles(toCents(value))}</Text>
           </View>
 
-          <Text style={styles.label}>¿De dónde sale?</Text>
+          <Text style={styles.label}>{cfg.cardQuestion}</Text>
           <View style={styles.wrap}>
             <Chip label="Efectivo" active={cardId === null} onPress={() => setCardId(null)} />
             {cards.map((c) => (
@@ -178,7 +182,7 @@ export function NewLoanForm({ close, initialPersonId }: Props) {
             ))}
           </View>
 
-          <Text style={styles.label}>¿Cuándo te lo devuelve?</Text>
+          <Text style={styles.label}>{cfg.dueQuestion}</Text>
           <View style={styles.wrap}>
             {DUE_OPTIONS.map((o) => (
               <Chip
@@ -193,7 +197,7 @@ export function NewLoanForm({ close, initialPersonId }: Props) {
           <Text style={styles.label}>Nota (opcional)</Text>
           <TextInput
             style={styles.input}
-            placeholder="Ej. para el taxi"
+            placeholder={cfg.notePlaceholder}
             placeholderTextColor={colors.textSecondary}
             value={notes}
             onChangeText={setNotes}

@@ -1,3 +1,5 @@
+import { LoanDirection } from "./direction";
+
 export type Person = {
   id: string;
   name: string;
@@ -16,6 +18,7 @@ export type PersonDebt = {
 };
 
 export type NewLoan = {
+  direction: LoanDirection;
   person: { id: string; name: string } | { id: null; name: string }; // id null = persona nueva
   amountCents: number;
   cardId: string | null; // null = efectivo
@@ -47,7 +50,9 @@ export type PersonDetail = {
 };
 
 export type NewPayment = {
+  direction: LoanDirection;
   personId: string;
   amountCents: number;
   cardId: string | null; // null = efectivo
 };
+

@@ -11,6 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { allocateOldestFirst } from '../allocate';
+import { DIRECTION, type LoanDirection } from '../direction';
 import { usePersonDetail, useRegisterPayment } from '../hooks';
 import { isPaymentError } from '../repository';
 
@@ -26,10 +27,12 @@ function amountToText(cents: number) {
 type Props = {
   close: (after?: () => void) => void;
   personId: string;
+  direction: LoanDirection;
 };
 
-export function RegisterPaymentForm({ close, personId }: Props) {
-  const { data: detail, isLoading } = usePersonDetail(personId);
+export function RegisterPaymentForm({ close, personId, direction }: Props) {
+  const cfg = DIRECTION[direction];
+  const { data: detail, isLoading } = usePersonDetail(personId, direction);
   const { data: cards = [] } = useCards();
   const registerPayment = useRegisterPayment();
 
@@ -56,15 +59,15 @@ export function RegisterPaymentForm({ close, personId }: Props) {
   const firstLoan = openLoans.find((l) => l.id === allocations[0]?.loanId);
   const applyText =
     allocations.length === 1 && firstLoan
-      ? `Se aplica al préstamo del ${formatShortDate(firstLoan.created_at)}`
+      ? cfg.applyOne(formatShortDate(firstLoan.created_at))
       : allocations.length > 1
-        ? `Se reparte entre ${allocations.length} préstamos, del más antiguo al más nuevo`
+        ? cfg.applyMany(allocations.length)
         : null;
 
   const onConfirm = () => {
     if (!canConfirm) return;
     registerPayment.mutate(
-      { personId, amountCents: cents, cardId },
+      { direction, personId, amountCents: cents, cardId },
       {
         onSuccess: () => close(),
         onError: (e) => console.error('[registerPayment] falló:', e),
@@ -93,7 +96,7 @@ export function RegisterPaymentForm({ close, personId }: Props) {
           <Text style={styles.title}>{name}</Text>
           {closeButton}
         </View>
-        <Text style={styles.hint}>{name} no te debe nada por ahora.</Text>
+        <Text style={styles.hint}>{cfg.noDebt(name)}</Text>
         <Button title="Cerrar" variant="secondary" onPress={() => close()} />
       </View>
     );
@@ -107,7 +110,7 @@ export function RegisterPaymentForm({ close, personId }: Props) {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.headerRow}>
-        <Text style={styles.title}>{name} te pagó</Text>
+        <Text style={styles.title}>{cfg.payTitle(name)}</Text>
         {closeButton}
       </View>
 
@@ -136,7 +139,7 @@ export function RegisterPaymentForm({ close, personId }: Props) {
 
       <View style={styles.infoBox}>
         <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Debía</Text>
+          <Text style={styles.infoLabel}>{cfg.owedLabel}</Text>
           <Text style={styles.infoValue}>{formatSoles(remaining)}</Text>
         </View>
         <View style={styles.infoRow}>
@@ -147,14 +150,14 @@ export function RegisterPaymentForm({ close, personId }: Props) {
         </View>
         {exceeds ? (
           <Text style={[styles.infoHint, { color: colors.danger }]}>
-            {name} solo debe {formatSoles(remaining)}.
+            {cfg.overMsg(name, formatSoles(remaining))}
           </Text>
         ) : applyText ? (
           <Text style={styles.infoHint}>{applyText}</Text>
         ) : null}
       </View>
 
-      <Text style={styles.label}>¿Dónde lo recibiste?</Text>
+      <Text style={styles.label}>{cfg.payCardQuestion}</Text>
       <View style={styles.wrap}>
         <Chip label="Efectivo" active={cardId === null} onPress={() => setCardId(null)} />
         {cards.map((c) => (

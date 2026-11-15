@@ -9,24 +9,33 @@ import {
 } from 'react';
 import { View } from 'react-native';
 import { RegisterPaymentForm } from './components/RegisterPaymentForm';
+import type { LoanDirection } from './direction';
 
-
-type PaymentSheetContextValue = { open: (personId: string) => void };
+type PaymentSheetContextValue = { open: (personId: string, direction: LoanDirection) => void };
 
 const PaymentSheetContext = createContext<PaymentSheetContextValue | null>(null);
 
 export function RegisterPaymentProvider({ children }: { children: ReactNode }) {
-  const [personId, setPersonId] = useState<string | null>(null);
-  const open = useCallback((id: string) => setPersonId(id), []);
+  const [target, setTarget] = useState<{ personId: string; direction: LoanDirection } | null>(null);
+  const open = useCallback(
+    (personId: string, direction: LoanDirection) => setTarget({ personId, direction }),
+    []
+  );
   const value = useMemo(() => ({ open }), [open]);
 
   return (
     <PaymentSheetContext.Provider value={value}>
       <View style={{ flex: 1 }}>
         {children}
-        {personId ? (
-          <BottomSheet onClose={() => setPersonId(null)}>
-            {(close) => <RegisterPaymentForm close={close} personId={personId} />}
+        {target ? (
+          <BottomSheet onClose={() => setTarget(null)}>
+            {(close) => (
+              <RegisterPaymentForm
+                close={close}
+                personId={target.personId}
+                direction={target.direction}
+              />
+            )}
           </BottomSheet>
         ) : null}
       </View>

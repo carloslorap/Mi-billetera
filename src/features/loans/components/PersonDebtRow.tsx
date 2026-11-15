@@ -2,6 +2,7 @@ import { colors } from '@/core/theme/colors';
 import { fontSize, radius, spacing } from '@/core/theme/layout';
 import { formatSoles } from '@/core/utils/money';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { DIRECTION, type LoanDirection } from '../direction';
 import { dueInfo, type DueTone } from '../dueInfo';
 import type { PersonDebt } from '../types';
 
@@ -11,10 +12,12 @@ const TONE_COLOR: Record<DueTone, string> = {
   danger: colors.danger,
 };
 
-export function PersonDebtRow({ item, onPress }: { item: PersonDebt; onPress?: () => void }) {
+type Props = { item: PersonDebt; direction: LoanDirection; onPress?: () => void };
+
+export function PersonDebtRow({ item, direction, onPress }: Props) {
+  const cfg = DIRECTION[direction];
   const settled = item.remaining_cents <= 0;
   const due = dueInfo(item.next_due);
-  const count = `${item.loans_count} ${item.loans_count === 1 ? 'préstamo' : 'préstamos'}`;
   const progress = item.lent_cents > 0 ? Math.min(1, item.paid_cents / item.lent_cents) : 0;
 
   return (
@@ -35,7 +38,7 @@ export function PersonDebtRow({ item, onPress }: { item: PersonDebt; onPress?: (
             style={[styles.sub, { color: settled ? colors.success : TONE_COLOR[due.tone] }]}
             numberOfLines={1}
           >
-            {count} · {settled ? 'todo cobrado' : due.text}
+            {cfg.countLabel(item.loans_count)} · {settled ? cfg.settledShort : due.text}
           </Text>
         </View>
         <Text style={[styles.amount, settled && { color: colors.textSecondary }]}>

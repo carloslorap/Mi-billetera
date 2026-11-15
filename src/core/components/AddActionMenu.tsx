@@ -40,14 +40,14 @@ export function AddActionMenu({ barHeight, onClose }: Props) {
       },
     },
     {
-      key: 'loan',
-      icon: 'cash-outline',
-      title: 'Prestar dinero',
-      subtitle: 'A quién y cuándo te lo devuelve',
+      key: 'debt',
+      icon: 'receipt-outline',
+      title: 'Registrar deuda',
+      subtitle: 'Alguien te prestó dinero',
       enabled: true,
       onPress: () => {
         onClose();
-        openLoan();
+        openLoan('borrowed');
       },
     },
     {
