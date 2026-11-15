@@ -136,7 +136,7 @@ export default function HomeScreen() {
         // />
 
         <View style={{ alignItems: 'center' }}>
-          <CardDeck width={cardWidth} cards={deckCards} />
+          <CardDeck width={cardWidth} cards={deckCards} onCardPress={(id) => router.push({ pathname: '/cards/[id]', params: { id } })}/>
         </View>
 
 

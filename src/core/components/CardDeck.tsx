@@ -2,7 +2,7 @@ import { CardView } from '@/core/components/CardView';
 import { colors } from '@/core/theme/colors';
 import { spacing } from '@/core/theme/layout';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Animated, PanResponder, StyleSheet, View } from 'react-native';
+import { Animated, PanResponder, Pressable, StyleSheet, View } from 'react-native';
 
 export type DeckCard = {
   id: string;
@@ -16,6 +16,7 @@ type Props = {
   cards: DeckCard[];
   width: number;
   onChange?: (index: number) => void;
+  onCardPress?: (cardId: string) => void;
 };
 
 // Cuánto se achican y bajan las tarjetas según su profundidad en el mazo
@@ -29,7 +30,7 @@ const SWIPE_VELOCITY = 0.6;
 const scaleAt = (d: number) => SCALE[Math.min(d, MAX_DEPTH)];
 const offsetAt = (d: number) => OFFSET_Y[Math.min(d, MAX_DEPTH)];
 
-export function CardDeck({ cards, width, onChange }: Props) {
+export function CardDeck({ cards, width, onChange, onCardPress }: Props) {
   const n = cards.length;
   const [front, setFront] = useState(0);
   const [sendingBack, setSendingBack] = useState(false);
@@ -44,7 +45,7 @@ export function CardDeck({ cards, width, onChange }: Props) {
   const widthRef = useRef(width);
   const frontRef = useRef(0);
   const onChangeRef = useRef(onChange);
-  const advanceRef = useRef<(dir: 1 | -1) => void>(() => {});
+  const advanceRef = useRef<(dir: 1 | -1) => void>(() => { });
 
   const current = n > 0 ? Math.min(front, n - 1) : 0;
 
@@ -145,37 +146,37 @@ export function CardDeck({ cards, width, onChange }: Props) {
 
           const transform = isFront
             ? [
-                { translateX: x },
-                {
-                  translateY: back.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, offsetAt(backDepth)],
-                  }),
-                },
-                {
-                  scale: back.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [1, scaleAt(backDepth)],
-                  }),
-                },
-                { rotate },
-              ]
+              { translateX: x },
+              {
+                translateY: back.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, offsetAt(backDepth)],
+                }),
+              },
+              {
+                scale: back.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [1, scaleAt(backDepth)],
+                }),
+              },
+              { rotate },
+            ]
             : [
-                {
-                  translateY: stackProgress.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [offsetAt(d), offsetAt(d - 1)],
-                    extrapolate: 'clamp',
-                  }),
-                },
-                {
-                  scale: stackProgress.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [scaleAt(d), scaleAt(d - 1)],
-                    extrapolate: 'clamp',
-                  }),
-                },
-              ];
+              {
+                translateY: stackProgress.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [offsetAt(d), offsetAt(d - 1)],
+                  extrapolate: 'clamp',
+                }),
+              },
+              {
+                scale: stackProgress.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [scaleAt(d), scaleAt(d - 1)],
+                  extrapolate: 'clamp',
+                }),
+              },
+            ];
 
           // Con más de 3 tarjetas, solo se ven las 3 de arriba
           const opacity = isFront
@@ -186,10 +187,10 @@ export function CardDeck({ cards, width, onChange }: Props) {
               ? 0
               : d === MAX_DEPTH + 1
                 ? stackProgress.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, 1],
-                    extrapolate: 'clamp',
-                  })
+                  inputRange: [0, 1],
+                  outputRange: [0, 1],
+                  extrapolate: 'clamp',
+                })
                 : 1;
 
           const zIndex = isFront ? (sendingBack ? 0 : 20) : Math.max(1, 10 - d);
@@ -203,12 +204,14 @@ export function CardDeck({ cards, width, onChange }: Props) {
                 { width, zIndex, opacity, transform, pointerEvents: isFront ? 'auto' : 'none' },
               ]}
             >
-              <CardView
-                name={card.name}
-                bank={card.bank}
-                balanceCents={card.balanceCents}
-                last4={card.last4}
-              />
+              <Pressable onPress={() => onCardPress?.(card.id)}>
+                <CardView
+                  name={card.name}
+                  bank={card.bank}
+                  balanceCents={card.balanceCents}
+                  last4={card.last4}
+                />
+              </Pressable>
             </Animated.View>
           );
         })}

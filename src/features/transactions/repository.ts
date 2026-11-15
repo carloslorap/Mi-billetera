@@ -33,3 +33,17 @@ export function getRecentTransactions(db: SQLiteDatabase, limit = 20) {
     [limit]
   );
 }
+
+
+export function getCardTransactions(db: SQLiteDatabase, cardId: string, limit = 300) {
+  return db.getAllAsync<Transaction>(
+    `SELECT t.id, t.card_id, c.name AS card_name, t.kind, t.amount_cents,
+            t.description, t.category, t.occurred_at
+     FROM transactions t
+     JOIN cards c ON c.id = t.card_id
+     WHERE t.card_id = ? AND t.deleted_at IS NULL
+     ORDER BY t.occurred_at DESC
+     LIMIT ?`,
+    [cardId, limit]
+  );
+}

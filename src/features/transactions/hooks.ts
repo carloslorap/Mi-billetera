@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSQLiteContext } from 'expo-sqlite';
-import { createTransaction, getRecentTransactions } from './repository';
+import { createTransaction, getCardTransactions, getRecentTransactions } from './repository';
 import type { NewTransaction } from './types';
 
 export function useRecentTransactions(limit = 20) {
@@ -21,5 +21,13 @@ export function useCreateTransaction() {
       queryClient.invalidateQueries({ queryKey: ['cards'] });
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
     },
+  });
+}
+
+export function useCardTransactions(cardId: string) {
+  const db = useSQLiteContext();
+  return useQuery({
+    queryKey: ['transactions', 'card', cardId],
+    queryFn: () => getCardTransactions(db, cardId),
   });
 }
