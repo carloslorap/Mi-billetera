@@ -2,6 +2,7 @@ import { Button } from '@/core/components/Button';
 import { Chip } from '@/core/components/Chip';
 import { ChipRow } from '@/core/components/ChipRow';
 import { Keypad } from '@/core/components/Keypad';
+import { MiniCard } from '@/core/components/MiniCard';
 import { colors } from '@/core/theme/colors';
 import { fontSize, radius, spacing } from '@/core/theme/layout';
 import { formatSoles, toCents } from '@/core/utils/money';
@@ -179,6 +180,7 @@ export function NewLoanForm({ close, initialPersonId, direction }: Props) {
                 label={`${c.name} · ${formatSoles(c.balance_cents)}`}
                 active={c.id === cardId}
                 onPress={() => setCardId(c.id)}
+                left={<MiniCard name={c.name} bank={c.bank} last4={c.last4} />}
               />
             ))}
           </ChipRow>
