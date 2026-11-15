@@ -7,6 +7,7 @@ import { useNewLoan } from '@/features/loans/NewLoanProvider';
 import { useNewTransaction } from '@/features/transactions/NewTransactionProvider';
 import { useEffect, useRef } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { StaggerItem } from './StaggerItem';
 type Option = {
   key: string;
   icon: keyof typeof Ionicons.glyphMap;
@@ -104,30 +105,32 @@ export function AddActionMenu({ barHeight, onClose }: Props) {
           { bottom: barHeight + 28, opacity: anim, transform: [{ translateY }] },
         ]}
       >
-        {options.map((o) => (
-          <Pressable
-            key={o.key}
-            disabled={!o.enabled}
-            onPress={o.onPress}
-            style={({ pressed }) => [
-              styles.row,
-              !o.enabled && { opacity: 0.55 },
-              pressed && o.enabled && { backgroundColor: 'rgba(255,255,255,0.05)' },
-            ]}
-          >
-            <View style={styles.iconCircle}>
-              <Ionicons name={o.icon} size={20} color={colors.primary} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.title}>{o.title}</Text>
-              <Text style={styles.subtitle}>{o.subtitle}</Text>
-            </View>
-            {!o.enabled ? (
-              <View style={styles.pill}>
-                <Text style={styles.pillText}>Pronto</Text>
+        {options.map((o, i) => (
+          <StaggerItem key={o.key} index={i} step={45}>
+            <Pressable
+              key={o.key}
+              disabled={!o.enabled}
+              onPress={o.onPress}
+              style={({ pressed }) => [
+                styles.row,
+                !o.enabled && { opacity: 0.55 },
+                pressed && o.enabled && { backgroundColor: 'rgba(255,255,255,0.05)' },
+              ]}
+            >
+              <View style={styles.iconCircle}>
+                <Ionicons name={o.icon} size={20} color={colors.primary} />
               </View>
-            ) : null}
-          </Pressable>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.title}>{o.title}</Text>
+                <Text style={styles.subtitle}>{o.subtitle}</Text>
+              </View>
+              {!o.enabled ? (
+                <View style={styles.pill}>
+                  <Text style={styles.pillText}>Pronto</Text>
+                </View>
+              ) : null}
+            </Pressable>
+          </StaggerItem>
         ))}
       </Animated.View>
     </>

@@ -96,7 +96,16 @@ export function NewLoanForm({ close, initialPersonId, direction }: Props) {
           </View>
 
           <Text style={styles.label}>{cfg.personQuestion}</Text>
-          <View style={styles.wrap}>
+          
+          <ChipRow bleed={spacing.lg}>
+            <Chip
+            label="+ Nueva"
+            active={showNewInput}
+            onPress={() => {
+              setCreatingNew(true);
+              setPersonId(null);
+            }}
+          />
             {people.map((p) => (
               <Chip
                 key={p.id}
@@ -108,15 +117,8 @@ export function NewLoanForm({ close, initialPersonId, direction }: Props) {
                 }}
               />
             ))}
-            <Chip
-              label="+ Nueva"
-              active={showNewInput}
-              onPress={() => {
-                setCreatingNew(true);
-                setPersonId(null);
-              }}
-            />
-          </View>
+
+           </ChipRow>
           {showNewInput ? (
             <TextInput
               style={styles.input}

@@ -1,5 +1,6 @@
 import { CardView } from '@/core/components/CardView';
 import { Chip } from '@/core/components/Chip';
+import { StaggerItem } from '@/core/components/StaggerItem';
 import { INFLOW_KINDS } from '@/core/db/kinds';
 import { colors } from '@/core/theme/colors';
 import { fontSize, radius, spacing } from '@/core/theme/layout';
@@ -91,23 +92,31 @@ export default function CardDetailScreen() {
             </View>
 
             <View style={styles.totals}>
-              <View style={styles.totalBox}>
-                <Text style={styles.totalLabel}>Entró</Text>
-                <Text style={[styles.totalValue, { color: colors.success }]}>
-                  {formatSoles(entro)}
-                </Text>
-              </View>
-              <View style={styles.totalBox}>
-                <Text style={styles.totalLabel}>Salió</Text>
-                <Text style={[styles.totalValue, { color: colors.danger }]}>
-                  {formatSoles(salio)}
-                </Text>
-              </View>
+              <StaggerItem index={0} style={styles.flex1}>
+                <View style={styles.totalBox}>
+                  <Text style={styles.totalLabel}>Entró</Text>
+                  <Text style={[styles.totalValue, { color: colors.success }]}>
+                    {formatSoles(entro)}
+                  </Text>
+                </View>
+              </StaggerItem>
+              <StaggerItem index={1} style={styles.flex1}>
+                <View style={styles.totalBox}>
+                  <Text style={styles.totalLabel}>Salió</Text>
+                  <Text style={[styles.totalValue, { color: colors.danger }]}>
+                    {formatSoles(salio)}
+                  </Text>
+                </View>
+              </StaggerItem>
             </View>
           </View>
         }
         ItemSeparatorComponent={() => <View style={{ height: spacing.sm }} />}
-        renderItem={({ item }) => <TransactionItem item={item} />}
+        renderItem={({ item, index }) => (
+           <StaggerItem index={index}>
+            <TransactionItem item={item} />
+          </StaggerItem>
+        )}
         ListEmptyComponent={
           <Text style={styles.empty}>Sin movimientos en este periodo.</Text>
         }
@@ -147,4 +156,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: spacing.xl,
   },
+  flex1: { flex: 1 },
 });

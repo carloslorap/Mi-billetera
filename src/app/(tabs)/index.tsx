@@ -68,6 +68,7 @@
 
 import { Button } from '@/core/components/Button';
 import { CardDeck } from '@/core/components/CardDeck';
+import { StaggerItem } from '@/core/components/StaggerItem';
 import { colors } from '@/core/theme/colors';
 import { fontSize, radius, spacing } from '@/core/theme/layout';
 import { formatSoles } from '@/core/utils/money';
@@ -136,7 +137,7 @@ export default function HomeScreen() {
         // />
 
         <View style={{ alignItems: 'center' }}>
-          <CardDeck width={cardWidth} cards={deckCards} onCardPress={(id) => router.push({ pathname: '/cards/[id]', params: { id } })}/>
+          <CardDeck width={cardWidth} cards={deckCards} onCardPress={(id) => router.push({ pathname: '/cards/[id]', params: { id } })} />
         </View>
 
 
@@ -162,7 +163,11 @@ export default function HomeScreen() {
         ItemSeparatorComponent={() => <View style={{ height: spacing.sm }} />}
         ListEmptyComponent={<Text style={styles.emptyList}>Aún no hay movimientos.</Text>}
         contentContainerStyle={{ paddingBottom: spacing.xl }}
-        renderItem={({ item }) => <TransactionItem item={item} />}
+        renderItem={({ item, index }) => (
+          <StaggerItem index={index}>
+            <TransactionItem item={item} />
+          </StaggerItem>
+        )}
       />
     </SafeAreaView>
   );
@@ -177,7 +182,7 @@ const styles = StyleSheet.create({
     paddingTop: spacing.lg,
     paddingBottom: spacing.md,
   },
-  sectionScanner:{
+  sectionScanner: {
     color: colors.textSecondary,
     fontSize: fontSize.md,
     paddingHorizontal: spacing.lg,

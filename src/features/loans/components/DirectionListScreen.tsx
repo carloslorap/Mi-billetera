@@ -1,5 +1,6 @@
 import { Button } from '@/core/components/Button';
 import { Chip } from '@/core/components/Chip';
+import { StaggerItem } from '@/core/components/StaggerItem';
 import { colors } from '@/core/theme/colors';
 import { fontSize, radius, spacing } from '@/core/theme/layout';
 import { formatSoles } from '@/core/utils/money';
@@ -83,14 +84,16 @@ export function DirectionListScreen({ direction }: { direction: LoanDirection })
             ) : null}
           </View>
         }
-        renderItem={({ item }) => (
-          <PersonDebtRow
-            item={item}
-            direction={direction}
-            onPress={() =>
-              router.push({ pathname: '/people/[id]', params: { id: item.person_id, direction } })
-            }
-          />
+        renderItem={({ item, index }) => (
+          <StaggerItem index={index}>
+            <PersonDebtRow
+              item={item}
+              direction={direction}
+              onPress={() =>
+                router.push({ pathname: '/people/[id]', params: { id: item.person_id, direction } })
+              }
+            />
+          </StaggerItem>
         )}
       />
     </SafeAreaView>
