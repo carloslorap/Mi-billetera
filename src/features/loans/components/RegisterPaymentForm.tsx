@@ -1,5 +1,6 @@
 import { Button } from '@/core/components/Button';
 import { Chip } from '@/core/components/Chip';
+import { ChipRow } from '@/core/components/ChipRow';
 import { Keypad } from '@/core/components/Keypad';
 import { colors } from '@/core/theme/colors';
 import { fontSize, radius, spacing } from '@/core/theme/layout';
@@ -158,7 +159,7 @@ export function RegisterPaymentForm({ close, personId, direction }: Props) {
       </View>
 
       <Text style={styles.label}>{cfg.payCardQuestion}</Text>
-      <View style={styles.wrap}>
+      <ChipRow bleed={spacing.lg}>
         <Chip label="Efectivo" active={cardId === null} onPress={() => setCardId(null)} />
         {cards.map((c) => (
           <Chip
@@ -168,7 +169,7 @@ export function RegisterPaymentForm({ close, personId, direction }: Props) {
             onPress={() => setCardId(c.id)}
           />
         ))}
-      </View>
+      </ChipRow>
 
       {registerPayment.isError ? (
         <Text style={styles.error}>

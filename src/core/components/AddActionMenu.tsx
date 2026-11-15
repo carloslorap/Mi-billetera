@@ -51,6 +51,17 @@ export function AddActionMenu({ barHeight, onClose }: Props) {
       },
     },
     {
+      key: 'loan',
+      icon: 'cash-outline',
+      title: 'Prestar dinero',
+      subtitle: 'A quién y cuándo te lo devuelve',
+      enabled: true,
+      onPress: () => {
+        onClose();
+        openLoan('lent');
+      },
+    },
+    {
       key: 'write',
       icon: 'pencil-outline',
       title: 'Escribir',

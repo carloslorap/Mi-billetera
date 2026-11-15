@@ -1,5 +1,6 @@
 import { Button } from '@/core/components/Button';
 import { Chip } from '@/core/components/Chip';
+import { ChipRow } from '@/core/components/ChipRow';
 import { colors } from '@/core/theme/colors';
 import { fontSize, radius, spacing } from '@/core/theme/layout';
 import { toCents } from '@/core/utils/money';
@@ -45,7 +46,7 @@ export function AddCardForm({ close }: { close: (after?: () => void) => void }) 
       </View>
 
       <Text style={styles.label}>Banco</Text>
-      <View style={styles.wrap}>
+      <ChipRow bleed={spacing.lg}>
         {BANKS.map((b) => (
           <Chip
             key={b}
@@ -54,7 +55,7 @@ export function AddCardForm({ close }: { close: (after?: () => void) => void }) 
             onPress={() => setBankChoice(b === bankChoice ? null : b)}
           />
         ))}
-      </View>
+      </ChipRow>
       {bankChoice === 'Otro' ? (
         <TextInput
           style={styles.input}

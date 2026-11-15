@@ -1,6 +1,7 @@
 // import { BottomSheet } from '@/core/components/BottomSheet';
 import { Button } from '@/core/components/Button';
 import { Chip } from '@/core/components/Chip';
+import { ChipRow } from '@/core/components/ChipRow';
 import { Keypad } from '@/core/components/Keypad';
 import { colors } from '@/core/theme/colors';
 import { fontSize, radius, spacing } from '@/core/theme/layout';
@@ -143,7 +144,7 @@ export function NewTransactionForm({ close }: { close: (after?: () => void) => v
               />
             </View>
           ) : (
-            <View style={styles.wrap}>
+            <ChipRow bleed={spacing.lg}>
               {cards.map((c) => (
                 <Chip
                   key={c.id}
@@ -152,13 +153,13 @@ export function NewTransactionForm({ close }: { close: (after?: () => void) => v
                   onPress={() => setSelectedCardId(c.id)}
                 />
               ))}
-            </View>
+            </ChipRow>
           )}
 
           {isExpense ? (
             <>
               <Text style={styles.label}>Categoría</Text>
-              <View style={styles.wrap}>
+             <ChipRow bleed={spacing.lg}>
                 {EXPENSE_CATEGORIES.map((cat) => (
                   <Chip
                     key={cat}
@@ -167,7 +168,7 @@ export function NewTransactionForm({ close }: { close: (after?: () => void) => v
                     onPress={() => setCategory(cat === category ? null : cat)}
                   />
                 ))}
-              </View>
+              </ChipRow>
             </>
           ) : null}
 

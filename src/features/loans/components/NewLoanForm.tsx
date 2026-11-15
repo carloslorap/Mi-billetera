@@ -1,5 +1,6 @@
 import { Button } from '@/core/components/Button';
 import { Chip } from '@/core/components/Chip';
+import { ChipRow } from '@/core/components/ChipRow';
 import { Keypad } from '@/core/components/Keypad';
 import { colors } from '@/core/theme/colors';
 import { fontSize, radius, spacing } from '@/core/theme/layout';
@@ -170,7 +171,7 @@ export function NewLoanForm({ close, initialPersonId, direction }: Props) {
           </View>
 
           <Text style={styles.label}>{cfg.cardQuestion}</Text>
-          <View style={styles.wrap}>
+          <ChipRow bleed={spacing.lg}>
             <Chip label="Efectivo" active={cardId === null} onPress={() => setCardId(null)} />
             {cards.map((c) => (
               <Chip
@@ -180,10 +181,10 @@ export function NewLoanForm({ close, initialPersonId, direction }: Props) {
                 onPress={() => setCardId(c.id)}
               />
             ))}
-          </View>
+          </ChipRow>
 
           <Text style={styles.label}>{cfg.dueQuestion}</Text>
-          <View style={styles.wrap}>
+          <ChipRow bleed={spacing.lg}>
             {DUE_OPTIONS.map((o) => (
               <Chip
                 key={o.key}
@@ -192,7 +193,7 @@ export function NewLoanForm({ close, initialPersonId, direction }: Props) {
                 onPress={() => setDueKey(o.key)}
               />
             ))}
-          </View>
+          </ChipRow>
 
           <Text style={styles.label}>Nota (opcional)</Text>
           <TextInput
