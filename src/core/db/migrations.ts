@@ -1,6 +1,6 @@
 import { type SQLiteDatabase } from 'expo-sqlite';
 
-const DATABASE_VERSION = 2;
+const DATABASE_VERSION = 3;
 
 export async function migrateDb(db: SQLiteDatabase) {
   // Se activa en cada conexión
@@ -66,6 +66,12 @@ export async function migrateDb(db: SQLiteDatabase) {
     await migrateToV2(db);
     await db.execAsync('PRAGMA user_version = 2');
     version = 2;
+  }
+
+  if (version === 2) {
+    await migrateToV3(db);
+    await db.execAsync('PRAGMA user_version = 3');
+    version = 3;
   }
 }
 
@@ -159,4 +165,46 @@ async function migrateToV2(db: SQLiteDatabase) {
   } finally {
     await db.execAsync('PRAGMA foreign_keys = ON;');
   }
+}
+
+async function migrateToV3(db: SQLiteDatabase) {
+  await db.execAsync(`
+    CREATE TABLE products (
+      id TEXT PRIMARY KEY NOT NULL,
+      barcode TEXT NOT NULL UNIQUE,
+      name TEXT,
+      price_cents INTEGER NOT NULL CHECK (price_cents >= 0),
+      price_updated_at TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      deleted_at TEXT
+    );
+
+    CREATE TABLE shopping_trips (
+      id TEXT PRIMARY KEY NOT NULL,
+      store TEXT,
+      budget_cents INTEGER CHECK (budget_cents IS NULL OR budget_cents > 0),
+      status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','done')),
+      transaction_id TEXT REFERENCES transactions(id),
+      created_at TEXT NOT NULL,
+      closed_at TEXT,
+      updated_at TEXT NOT NULL,
+      deleted_at TEXT
+    );
+
+    CREATE TABLE shopping_items (
+      id TEXT PRIMARY KEY NOT NULL,
+      trip_id TEXT NOT NULL REFERENCES shopping_trips(id),
+      product_id TEXT REFERENCES products(id),
+      name TEXT NOT NULL,
+      unit_price_cents INTEGER NOT NULL CHECK (unit_price_cents >= 0),
+      quantity INTEGER NOT NULL DEFAULT 1 CHECK (quantity > 0),
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      deleted_at TEXT
+    );
+
+    CREATE INDEX idx_items_trip ON shopping_items(trip_id);
+    CREATE INDEX idx_trips_status ON shopping_trips(status);
+  `);
 }

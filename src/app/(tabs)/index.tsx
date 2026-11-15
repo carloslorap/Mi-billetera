@@ -75,7 +75,9 @@ import { useAddCard } from '@/features/cards/AddCardProvider';
 import { useCards } from '@/features/cards/hooks';
 import { TransactionItem } from '@/features/transactions/components/TransactionItem';
 import { useRecentTransactions } from '@/features/transactions/hooks';
-import { FlatList, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import { FlatList, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
@@ -96,7 +98,15 @@ export default function HomeScreen() {
 
   const header = (
     <View>
-      <Text style={styles.sectionLabel}>Tus tarjetas</Text>
+
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+
+        <Text style={styles.sectionLabel}>Tus tarjetas</Text>
+
+        <Pressable onPress={() => router.push('/scanner')} hitSlop={10} style={styles.sectionScanner}>
+          <Ionicons name="barcode-outline" size={26} color="#95FF77" />
+        </Pressable>
+      </View>
 
       {cards.length === 0 ? (
         <View style={styles.empty}>
@@ -124,9 +134,12 @@ export default function HomeScreen() {
         //     </View>
         //   )}
         // />
+
         <View style={{ alignItems: 'center' }}>
           <CardDeck width={cardWidth} cards={deckCards} />
         </View>
+
+
       )}
 
       {cards.length > 1 ? (
@@ -158,6 +171,13 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   sectionLabel: {
+    color: colors.textSecondary,
+    fontSize: fontSize.md,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.md,
+  },
+  sectionScanner:{
     color: colors.textSecondary,
     fontSize: fontSize.md,
     paddingHorizontal: spacing.lg,
