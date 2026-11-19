@@ -1,3 +1,4 @@
+import { AvatarPicker } from '@/core/components/AvatarPicker';
 import { Button } from '@/core/components/Button';
 import { Chip } from '@/core/components/Chip';
 import { ChipRow } from '@/core/components/ChipRow';
@@ -50,6 +51,7 @@ export function NewLoanForm({ close, initialPersonId, direction }: Props) {
   const [cardId, setCardId] = useState<string | null>(null); // null = efectivo
   const [dueKey, setDueKey] = useState('none');
   const [notes, setNotes] = useState('');
+  const [avatar, setAvatar] = useState<string | null>(null);
 
   const showNewInput = creatingNew || (!loadingPeople && people.length === 0);
   const selectedPerson = showNewInput ? null : (people.find((p) => p.id === personId) ?? null);
@@ -65,7 +67,7 @@ export function NewLoanForm({ close, initialPersonId, direction }: Props) {
         direction,
         person: selectedPerson
           ? { id: selectedPerson.id, name: selectedPerson.name }
-          : { id: null, name: personName },
+          : { id: null, name: personName, avatar: avatar ?? null },
         amountCents: toCents(value),
         cardId,
         expectedReturnDate: due ? format(due, 'yyyy-MM-dd') : null,
@@ -96,16 +98,16 @@ export function NewLoanForm({ close, initialPersonId, direction }: Props) {
           </View>
 
           <Text style={styles.label}>{cfg.personQuestion}</Text>
-          
+
           <ChipRow bleed={spacing.lg}>
             <Chip
-            label="+ Nueva"
-            active={showNewInput}
-            onPress={() => {
-              setCreatingNew(true);
-              setPersonId(null);
-            }}
-          />
+              label="+ Nueva"
+              active={showNewInput}
+              onPress={() => {
+                setCreatingNew(true);
+                setPersonId(null);
+              }}
+            />
             {people.map((p) => (
               <Chip
                 key={p.id}
@@ -118,18 +120,20 @@ export function NewLoanForm({ close, initialPersonId, direction }: Props) {
               />
             ))}
 
-           </ChipRow>
+          </ChipRow>
           {showNewInput ? (
-            <TextInput
-              style={styles.input}
-              placeholder="Nombre de la persona"
-              placeholderTextColor={colors.textSecondary}
-              value={newName}
-              onChangeText={setNewName}
-              autoCapitalize="words"
-            />
+            <>
+              <TextInput
+                style={styles.input}
+                placeholder="Nombre de la persona"
+                placeholderTextColor={colors.textSecondary}
+                value={newName}
+                onChangeText={setNewName}
+                autoCapitalize="words"
+              />
+              <AvatarPicker value={avatar} onChange={setAvatar} bleed={spacing.lg} />
+            </>
           ) : null}
-
           <Text style={styles.label}>Monto</Text>
           <View style={[styles.amountBox, { boxShadow: AMOUNT_GLOW }]}>
             <Text style={[styles.amountText, amount === '' && styles.amountPlaceholder]}>

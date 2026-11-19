@@ -1,6 +1,6 @@
 import { type SQLiteDatabase } from 'expo-sqlite';
 
-const DATABASE_VERSION = 3;
+const DATABASE_VERSION = 4;
 
 export async function migrateDb(db: SQLiteDatabase) {
   // Se activa en cada conexión
@@ -72,6 +72,12 @@ export async function migrateDb(db: SQLiteDatabase) {
     await migrateToV3(db);
     await db.execAsync('PRAGMA user_version = 3');
     version = 3;
+  }
+
+  if (version === 3) {
+    await migrateToV4(db);
+    await db.execAsync('PRAGMA user_version = 4');
+    version = 4;
   }
 }
 
@@ -207,4 +213,8 @@ async function migrateToV3(db: SQLiteDatabase) {
     CREATE INDEX idx_items_trip ON shopping_items(trip_id);
     CREATE INDEX idx_trips_status ON shopping_trips(status);
   `);
+}
+
+async function migrateToV4(db: SQLiteDatabase) {
+  await db.execAsync('ALTER TABLE people ADD COLUMN avatar TEXT');
 }

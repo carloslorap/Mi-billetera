@@ -16,7 +16,7 @@ import type {
 
 export function getPeople(db: SQLiteDatabase) {
   return db.getAllAsync<Person>(
-    'SELECT id, name, aliases FROM people WHERE deleted_at IS NULL ORDER BY name COLLATE NOCASE'
+    'SELECT id, name, aliases, avatar FROM people WHERE deleted_at IS NULL ORDER BY name COLLATE NOCASE'
   );
 }
 
@@ -35,6 +35,7 @@ export function getPersonDebts(db: SQLiteDatabase, direction: LoanDirection) {
      )
      SELECT
        pe.id AS person_id,
+       pe.avatar AS avatar,
        pe.name AS name,
        COUNT(lt.id) AS loans_count,
        SUM(lt.amount_cents) AS lent_cents,
@@ -74,9 +75,10 @@ export async function createLoan(db: SQLiteDatabase, input: NewLoan) {
 
     if (!personId) {
       personId = Crypto.randomUUID();
-      await db.runAsync('INSERT INTO people (id, name) VALUES (?, ?)', [
+      await db.runAsync('INSERT INTO people (id, name,avatar) VALUES (?, ?, ?)', [
         personId,
         input.person.name.trim(),
+        'avatar' in input.person ? input.person.avatar ?? null : null,
       ]);
     }
 
@@ -112,6 +114,14 @@ export async function createLoan(db: SQLiteDatabase, input: NewLoan) {
   });
 
   return loanId;
+}
+
+export async function setPersonAvatar(db: SQLiteDatabase, personId: string, avatar: string | null) {
+  await db.runAsync('UPDATE people SET avatar = ?, updated_at = ? WHERE id = ?', [
+    avatar,
+    new Date().toISOString(),
+    personId,
+  ]);
 }
 
 function paymentError(message: string) {

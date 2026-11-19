@@ -1,3 +1,4 @@
+import { Avatar } from '@/core/components/Avatar';
 import { colors } from '@/core/theme/colors';
 import { fontSize, radius, spacing } from '@/core/theme/layout';
 import { formatSoles } from '@/core/utils/money';
@@ -27,9 +28,7 @@ export function PersonDebtRow({ item, direction, onPress }: Props) {
       style={({ pressed }) => [styles.row, pressed && { opacity: 0.9 }]}
     >
       <View style={styles.top}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{item.name.trim().charAt(0).toUpperCase()}</Text>
-        </View>
+        <Avatar name={item.name} avatar={item.avatar} size={44} />
         <View style={{ flex: 1 }}>
           <Text style={styles.name} numberOfLines={1}>
             {item.name}
@@ -63,15 +62,6 @@ const styles = StyleSheet.create({
     borderTopColor: 'rgba(255,255,255,0.10)',
   },
   top: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.background,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarText: { color: colors.primary, fontSize: fontSize.lg, fontWeight: '700' },
   name: { color: colors.textPrimary, fontSize: fontSize.lg, fontWeight: '600' },
   sub: { fontSize: fontSize.sm, marginTop: 2 },
   amount: { color: colors.textPrimary, fontSize: fontSize.lg, fontWeight: '700' },

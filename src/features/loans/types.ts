@@ -1,15 +1,13 @@
 import { LoanDirection } from "./direction";
 
-export type Person = {
-  id: string;
-  name: string;
-  aliases: string | null;
-};
+export type Person = { id: string; name: string; aliases: string | null; avatar: string | null };
+
 
 // Una fila de la lista de Préstamos: todo lo que una persona te debe, ya sumado
 export type PersonDebt = {
   person_id: string;
   name: string;
+  avatar: string | null;
   loans_count: number;
   lent_cents: number; // total prestado
   paid_cents: number; // total cobrado
@@ -19,7 +17,7 @@ export type PersonDebt = {
 
 export type NewLoan = {
   direction: LoanDirection;
-  person: { id: string; name: string } | { id: null; name: string }; // id null = persona nueva
+  person: { id: string; name: string } | { id: null; name: string; avatar?: string | null };
   amountCents: number;
   cardId: string | null; // null = efectivo
   expectedReturnDate: string | null; // 'YYYY-MM-DD'
