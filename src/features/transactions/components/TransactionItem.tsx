@@ -4,7 +4,7 @@ import { fontSize, radius, spacing } from '@/core/theme/layout';
 import { formatSoles } from '@/core/utils/money';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { Transaction } from '../types';
 
 const RED = { color: colors.danger, tint: 'rgba(255,107,107,0.14)', watermark: 'rgba(255,107,107,0.07)' };
@@ -23,7 +23,7 @@ const TONES = {
 
 const ARROW_SIZE = 65;
 
-export function TransactionItem({ item }: { item: Transaction }) {
+export function TransactionItem({ item,onLongPress  }: { item: Transaction ;onLongPress?: () => void }) {
     const tone = TONES[item.kind];
     const title = item.description || item.category || tone.fallback;
     const date = new Date(item.occurred_at).toLocaleDateString('es-PE', {
@@ -32,7 +32,7 @@ export function TransactionItem({ item }: { item: Transaction }) {
     });
 
     return (
-        <View style={styles.wrap}>
+        <Pressable onLongPress={onLongPress} delayLongPress={350} style={styles.wrap}>
             <LinearGradient
                 colors={[colors.surface, tone.tint]}
                 start={{ x: 0.3, y: 0.5 }}
@@ -59,7 +59,7 @@ export function TransactionItem({ item }: { item: Transaction }) {
                     {tone.sign} {formatSoles(item.amount_cents)}
                 </Text>
             </LinearGradient>
-        </View>
+        </Pressable>
     );
 }
 

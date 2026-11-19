@@ -47,3 +47,15 @@ export function getCardTransactions(db: SQLiteDatabase, cardId: string, limit = 
     [cardId, limit]
   );
 }
+
+
+// Solo gastos e ingresos sueltos; los de préstamos se eliminan desde la persona.
+export async function deleteTransaction(db: SQLiteDatabase, id: string) {
+  const now = new Date().toISOString();
+  const r = await db.runAsync(
+    `UPDATE transactions SET deleted_at = ?, updated_at = ?
+     WHERE id = ? AND deleted_at IS NULL AND kind IN ('expense', 'income')`,
+    [now, now, id]
+  );
+  return r.changes > 0;
+}

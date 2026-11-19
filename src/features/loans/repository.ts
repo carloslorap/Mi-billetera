@@ -233,3 +233,50 @@ export async function registerPayment(db: SQLiteDatabase, input: NewPayment) {
 
   return created;
 }
+
+
+
+// Anula un pago y el movimiento de tarjeta que generó. Todo o nada.
+export async function deletePayment(db: SQLiteDatabase, paymentId: string) {
+  const now = new Date().toISOString();
+  await db.withTransactionAsync(async () => {
+    await db.runAsync(
+      `UPDATE transactions SET deleted_at = ?, updated_at = ?
+       WHERE loan_payment_id = ? AND deleted_at IS NULL`,
+      [now, now, paymentId]
+    );
+    await db.runAsync(
+      `UPDATE loan_payments SET deleted_at = ?, updated_at = ?
+       WHERE id = ? AND deleted_at IS NULL`,
+      [now, now, paymentId]
+    );
+  });
+}
+
+// Elimina el préstamo con sus pagos y todos los movimientos ligados. Todo o nada.
+export async function deleteLoan(db: SQLiteDatabase, loanId: string) {
+  const now = new Date().toISOString();
+  await db.withTransactionAsync(async () => {
+    await db.runAsync(
+      `UPDATE transactions SET deleted_at = ?, updated_at = ?
+       WHERE deleted_at IS NULL
+         AND loan_payment_id IN (SELECT id FROM loan_payments WHERE loan_id = ?)`,
+      [now, now, loanId]
+    );
+    await db.runAsync(
+      `UPDATE loan_payments SET deleted_at = ?, updated_at = ?
+       WHERE loan_id = ? AND deleted_at IS NULL`,
+      [now, now, loanId]
+    );
+    await db.runAsync(
+      `UPDATE transactions SET deleted_at = ?, updated_at = ?
+       WHERE loan_id = ? AND deleted_at IS NULL`,
+      [now, now, loanId]
+    );
+    await db.runAsync(
+      `UPDATE loans SET deleted_at = ?, updated_at = ?
+       WHERE id = ? AND deleted_at IS NULL`,
+      [now, now, loanId]
+    );
+  });
+}

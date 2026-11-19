@@ -76,6 +76,7 @@ import { useAddCard } from '@/features/cards/AddCardProvider';
 import { useCards } from '@/features/cards/hooks';
 import { TransactionItem } from '@/features/transactions/components/TransactionItem';
 import { useRecentTransactions } from '@/features/transactions/hooks';
+import { useConfirmDeleteTransaction } from '@/features/transactions/useConfirmDelete';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { FlatList, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
@@ -89,6 +90,8 @@ export default function HomeScreen() {
 
   const cardWidth = width - spacing.lg * 2;
   const total = cards.reduce((sum, c) => sum + c.balance_cents, 0);
+
+  const confirmDelete = useConfirmDeleteTransaction();
 
   const deckCards = cards.map((c) => ({
     id: c.id,
@@ -165,7 +168,7 @@ export default function HomeScreen() {
         contentContainerStyle={{ paddingBottom: spacing.xl }}
         renderItem={({ item, index }) => (
           <StaggerItem index={index}>
-            <TransactionItem item={item} />
+            <TransactionItem item={item} onLongPress={() => confirmDelete(item)}  />
           </StaggerItem>
         )}
       />

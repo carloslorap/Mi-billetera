@@ -8,6 +8,7 @@ import { formatSoles } from '@/core/utils/money';
 import { useCards } from '@/features/cards/hooks';
 import { TransactionItem } from '@/features/transactions/components/TransactionItem';
 import { useCardTransactions } from '@/features/transactions/hooks';
+import { useConfirmDeleteTransaction } from '@/features/transactions/useConfirmDelete';
 import { Ionicons } from '@expo/vector-icons';
 import { endOfMonth, isWithinInterval, startOfMonth, subMonths } from 'date-fns';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -30,7 +31,7 @@ export default function CardDetailScreen() {
   const { data: cards } = useCards();
   const { data: all = [] } = useCardTransactions(id);
   const card = cards?.find((c) => c.id === id);
-
+  const confirmDelete = useConfirmDeleteTransaction();
   const items = useMemo(() => {
     if (period === 'all') return all;
     const ref = period === 'month' ? new Date() : subMonths(new Date(), 1);
@@ -114,7 +115,7 @@ export default function CardDetailScreen() {
         ItemSeparatorComponent={() => <View style={{ height: spacing.sm }} />}
         renderItem={({ item, index }) => (
            <StaggerItem index={index}>
-            <TransactionItem item={item} />
+            <TransactionItem item={item} onLongPress={() => confirmDelete(item)} />
           </StaggerItem>
         )}
         ListEmptyComponent={

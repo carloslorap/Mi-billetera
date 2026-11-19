@@ -3,6 +3,8 @@ import { useSQLiteContext } from 'expo-sqlite';
 import type { LoanDirection } from './direction';
 import {
   createLoan,
+  deleteLoan,
+  deletePayment,
   getPeople,
   getPersonDebts,
   getPersonDetail,
@@ -64,6 +66,25 @@ export function useRegisterPayment() {
   const invalidate = useInvalidateMoney();
   return useMutation({
     mutationFn: (input: NewPayment) => registerPayment(db, input),
+    onSuccess: invalidate,
+  });
+}
+
+
+export function useDeletePayment() {
+  const db = useSQLiteContext();
+  const invalidate = useInvalidateMoney();
+  return useMutation({
+    mutationFn: (paymentId: string) => deletePayment(db, paymentId),
+    onSuccess: invalidate,
+  });
+}
+
+export function useDeleteLoan() {
+  const db = useSQLiteContext();
+  const invalidate = useInvalidateMoney();
+  return useMutation({
+    mutationFn: (loanId: string) => deleteLoan(db, loanId),
     onSuccess: invalidate,
   });
 }
