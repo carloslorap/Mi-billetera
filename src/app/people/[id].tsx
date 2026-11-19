@@ -5,13 +5,14 @@ import { formatShortDate } from '@/core/utils/dates';
 import { formatSoles } from '@/core/utils/money';
 import { DIRECTION, type LoanDirection } from '@/features/loans/direction';
 import { dueInfo, type DueTone } from '@/features/loans/dueInfo';
-import { usePersonDetail } from '@/features/loans/hooks';
+import { useDeleteLoan, useDeletePayment, usePersonDetail } from '@/features/loans/hooks';
 import { useNewLoan } from '@/features/loans/NewLoanProvider';
 import { usePaymentSheet } from '@/features/loans/RegisterPaymentProvider';
+import { LoanWithPaid, PaymentRow } from '@/features/loans/types';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const ARROW_SIZE = 70;
@@ -43,6 +44,52 @@ export default function PersonDetailScreen() {
 
   const paymentSign = direction === 'lent' ? '+' : '-';
   const paymentColor = direction === 'lent' ? colors.success : colors.warning;
+
+  const deleteLoan = useDeleteLoan();
+  const deletePayment = useDeletePayment();
+
+
+  const confirmDeleteLoan = (l: LoanWithPaid) => {
+    const n = payments.filter((p) => p.loan_id === l.id).length;
+    const extra =
+      n > 0
+        ? `Se borran también ${n} ${n === 1 ? 'pago' : 'pagos'} y sus movimientos de tarjeta.`
+        : 'Si usaste una tarjeta, su movimiento también se borra.';
+
+    Alert.alert(
+      direction === 'lent' ? 'Eliminar préstamo' : 'Eliminar deuda',
+      `${formatSoles(l.amount_cents)} · ${formatShortDate(l.created_at)}\n\n${extra}`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Eliminar',
+          style: 'destructive',
+          onPress: () =>
+            deleteLoan.mutate(l.id, {
+              // si era el último, ya no queda nada que mostrar de esta persona
+              onSuccess: () => {
+                if (loans.length === 1) router.back();
+              },
+            }),
+        },
+      ]
+    );
+  };
+
+
+  const confirmDeletePayment = (p: PaymentRow) => {
+    const pending = direction === 'lent' ? 'cobrar' : 'pagar';
+    const card = p.card_name ? ` El saldo de ${p.card_name} se recalcula.` : '';
+
+    Alert.alert(
+      'Anular pago',
+      `${formatSoles(p.amount_cents)} · ${formatShortDate(p.paid_at)}\n\nVolverá a quedar pendiente por ${pending}.${card}`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Anular', style: 'destructive', onPress: () => deletePayment.mutate(p.id) },
+      ]
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
@@ -107,7 +154,8 @@ export default function PersonDetailScreen() {
             const done = left <= 0;
             const due = dueInfo(l.expected_return_date);
             return (
-              <View key={l.id} style={styles.item}>
+              <Pressable key={l.id} style={styles.item} onLongPress={() => confirmDeleteLoan(l)}
+                delayLongPress={350}>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.itemTitle}>{formatSoles(l.amount_cents)}</Text>
                   <Text
@@ -127,7 +175,7 @@ export default function PersonDetailScreen() {
                     {done ? 'Pagado' : `${cfg.pillOwes} ${formatSoles(left)}`}
                   </Text>
                 </View>
-              </View>
+              </Pressable>
             );
           })}
 
@@ -136,7 +184,8 @@ export default function PersonDetailScreen() {
             <Text style={styles.emptyList}>Aún no hay pagos.</Text>
           ) : (
             payments.map((p) => (
-              <View key={p.id} style={styles.item}>
+              <Pressable key={p.id} style={styles.item} onLongPress={() => confirmDeletePayment(p)}
+                delayLongPress={350}>
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.itemTitle, { color: paymentColor }]}>
                     {paymentSign} {formatSoles(p.amount_cents)}
@@ -145,7 +194,7 @@ export default function PersonDetailScreen() {
                     {formatShortDate(p.paid_at)} · {p.card_name ?? 'Efectivo'}
                   </Text>
                 </View>
-              </View>
+              </Pressable>
             ))
           )}
         </ScrollView>
