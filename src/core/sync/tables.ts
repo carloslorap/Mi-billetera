@@ -27,10 +27,28 @@ export const ALL_TABLES: Record<string, SyncTable> = {
             'occurred_at', 'loan_id', 'loan_payment_id',
             'created_at', 'updated_at', 'deleted_at'],
     },
-    // las demás se agregan una por una (necesito ver sus repositorios)
+    products: {
+        name: 'products',
+        columns: ['id', 'barcode', 'name', 'price_cents', 'price_updated_at',
+            'created_at', 'updated_at', 'deleted_at'],
+    },
+    shopping_trips: {
+        name: 'shopping_trips',
+        columns: ['id', 'store', 'budget_cents', 'status', 'transaction_id',
+            'created_at', 'closed_at', 'updated_at', 'deleted_at'],
+    },
+    shopping_items: {
+        name: 'shopping_items',
+        columns: ['id', 'trip_id', 'product_id', 'name', 'unit_price_cents', 'quantity',
+            'created_at', 'updated_at', 'deleted_at'],
+    },
+
 };
 
 
-export const ENABLED_TABLES = ['cards', 'people', 'loans', 'loan_payments','transactions'];
+export const ENABLED_TABLES = [
+  'cards', 'people', 'loans', 'loan_payments', 'transactions',
+  'products', 'shopping_trips', 'shopping_items',
+];
 export const WIPE_ORDER = ['shopping_items', 'shopping_trips', 'products', 'loan_payments',
     'loans', 'transactions', 'people', 'cards'];
