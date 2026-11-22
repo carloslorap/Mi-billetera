@@ -21,10 +21,16 @@ export const ALL_TABLES: Record<string, SyncTable> = {
         columns: ['id', 'loan_id', 'amount_cents', 'paid_at',
             'created_at', 'updated_at', 'deleted_at'],
     },
+    transactions: {
+        name: 'transactions',
+        columns: ['id', 'card_id', 'kind', 'amount_cents', 'description', 'category',
+            'occurred_at', 'loan_id', 'loan_payment_id',
+            'created_at', 'updated_at', 'deleted_at'],
+    },
     // las demás se agregan una por una (necesito ver sus repositorios)
 };
 
 
-export const ENABLED_TABLES = ['cards', 'people','loans','loan_payments'];
+export const ENABLED_TABLES = ['cards', 'people', 'loans', 'loan_payments','transactions'];
 export const WIPE_ORDER = ['shopping_items', 'shopping_trips', 'products', 'loan_payments',
     'loans', 'transactions', 'people', 'cards'];
