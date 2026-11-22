@@ -1,6 +1,6 @@
 import { type SQLiteDatabase } from 'expo-sqlite';
 
-const DATABASE_VERSION = 4;
+const DATABASE_VERSION = 5;
 
 export async function migrateDb(db: SQLiteDatabase) {
   // Se activa en cada conexión
@@ -78,6 +78,12 @@ export async function migrateDb(db: SQLiteDatabase) {
     await migrateToV4(db);
     await db.execAsync('PRAGMA user_version = 4');
     version = 4;
+  }
+
+  if (version === 4) {
+    await migrateToV5(db);
+    await db.execAsync('PRAGMA user_version = 5');
+    version = 5;
   }
 }
 
@@ -217,4 +223,42 @@ async function migrateToV3(db: SQLiteDatabase) {
 
 async function migrateToV4(db: SQLiteDatabase) {
   await db.execAsync('ALTER TABLE people ADD COLUMN avatar TEXT');
+}
+
+
+const SYNC_TABLES = ['cards','people','loans','loan_payments',
+  'transactions','products','shopping_trips','shopping_items'];
+
+async function migrateToV5(db: SQLiteDatabase) {
+  await db.withTransactionAsync(async () => {
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS sync_meta (
+        key TEXT PRIMARY KEY NOT NULL,
+        value TEXT
+      );
+    `);
+    for (const t of SYNC_TABLES) {
+      await db.execAsync(`
+        ALTER TABLE ${t} ADD COLUMN dirty INTEGER NOT NULL DEFAULT 0;
+        UPDATE ${t} SET dirty = 1;
+
+        CREATE TRIGGER ${t}_mark_dirty_ins AFTER INSERT ON ${t}
+        WHEN NEW.dirty = 0
+        BEGIN
+          UPDATE ${t} SET dirty = 1,
+            updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')
+          WHERE id = NEW.id;
+        END;
+
+        CREATE TRIGGER ${t}_mark_dirty AFTER UPDATE ON ${t}
+        WHEN NEW.dirty = OLD.dirty
+        BEGIN
+          UPDATE ${t} SET dirty = 1,
+            updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')
+          WHERE id = NEW.id;
+        END;
+      `);
+    }
+    await db.execAsync('PRAGMA user_version = 5;');
+  });
 }
